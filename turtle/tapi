@@ -74,10 +74,10 @@ function scan_inventory()
 end
 
 function scan_turtle_specs()
-  state.loc.x = tapi.getLoc().x
-  state.loc.y = tapi.getLoc().y
-  state.loc.z = tapi.getLoc().z
-  state.rot = tapi.getLoc().h - 1
+  state.loc.x = getLoc().x
+  state.loc.y = getLoc().y
+  state.loc.z = getLoc().z
+  state.rot = getLoc().h - 1
   state.id = os.getComputerID()
   state.label = os.getComputerLabel() or ""
   state.fuelLevel = turtle.getFuelLevel()
@@ -265,9 +265,9 @@ function goTo(x, y, z)
     local dy = y - loc_internal.y
     local dz = z - loc_internal.z
 
-    tapi.move(dx, 0, 0)
-    tapi.move(0, dy, 0)
-    tapi.move(0, 0, dz)
+    move(dx, 0, 0)
+    move(0, dy, 0)
+    move(0, 0, dz)
 
     if (old_loc - loc_internal:tovector()):length() == 0 then return false end
   end
