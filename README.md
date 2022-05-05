@@ -44,7 +44,7 @@ If you have other mods installed you can also extract the textures in the same w
 | d   | turn right                 |
 | del | stop (clear command queue) |
   
-**Known Bugs**
+**Known bugs**
   
-* there is a bug in the transaction code which desyncs the ui block world state from the servers' - a page reload fixes this temporarily; you can also revert to my previous technique of sending the whole state every request by inserting `res.send({ state: state }); return;` as the first line after `app.post('/api/getStateUpdate', (req, res) => {` in the `server.js`.
+* when using the transaction-only state update method, there is a bug in the transaction code which desyncs the ui block world state from the servers' - a page reload fixes this temporarily; for now the default is fetching the complete state every second, but this is not very performant for larger states
   

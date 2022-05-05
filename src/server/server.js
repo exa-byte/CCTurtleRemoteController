@@ -106,6 +106,8 @@ app.get('/api/state', (req, res) => {
 });
 
 app.post('/api/getStateUpdate', (req, res) => {
+  const useOldStateUpdateMethod = true; // until the transaction-only update method works bug free, use the old method
+  if (useOldStateUpdateMethod) { res.send({ state: state }); return; }
   // console.log(`${req.body.lastTransactionId} | ${state.lastReadyTransactionId} | ${state.lastTransactionId}`);
   // if no remote last transaction is given, send complete state
   if (!req.body.lastTransactionId) { res.send({ state: state }); return; }
