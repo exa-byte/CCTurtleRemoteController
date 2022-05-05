@@ -11,7 +11,7 @@ A node server with user interface for remote controlling your computercraft turt
     * allow http calls to localhost in your <mcsavegame>/serverconfig/computercraft-server.toml
 6. Build the frontend using `npm run build`
 7. Run the server: `npm run server`
-8. You can now reach the ui from http://localhost/
+8. You can now reach the ui from http://localhost/ or your public ip address if you chose the second option in step 4
 9. Add any amount of turtles by running `wget run https://raw.githubusercontent.com/exa-byte/CCTurtleRemoteController/main/turtle/startup` in the turtles command line and following the displayed instructions
 10. You can now select a turtle id in the top left corner of the ui and press the `toggle follow` button to move the camera to it
 11. The selected turtle can be controlled by the buttons on the interface or some basic keyboard shortcuts (wasdqe)
@@ -22,6 +22,18 @@ A node server with user interface for remote controlling your computercraft turt
 The ui supports textured blocks and items. They are just not included here for license reasons. If you want to, you can extract the block textures from your `/minecraft/versions/YOUR_VERSION/x.xx.x.jar` and paste them into `textures/blocks/minecraft/`.
 Same goes for items which go into `textures/items/minecraft/`. However normal block icons are not included, you will have to render them yourself from the blocktextures or get them from somewhere else (I used https://www.npmjs.com/package/minecraft-blocks-render).
 If you have other mods installed you can also extract the textures in the same way, except that the textures then go into `textures/blocks/yourmodname/` and `textures/items/yourmodname/` respectively.
+   
+**Keyboard bindings**
+   
+| Key | Action                     |
+|-----|----------------------------|
+| w   | move forward               |
+| s   | move back                  |
+| q   | move down                  |
+| e   | move up                    |
+| a   | turn left                  |
+| d   | turn right                 |
+| del | stop (clear command queue) |
   
 **Known Bugs**
   
