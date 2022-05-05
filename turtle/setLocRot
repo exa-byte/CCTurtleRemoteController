@@ -1,0 +1,10 @@
+os.loadAPI("tapi")
+
+local x, y, z, h = ...
+
+tapi.loc_internal.x = tonumber(x)
+tapi.loc_internal.y = tonumber(y)
+tapi.loc_internal.z = tonumber(z)
+tapi.loc_internal.h = tonumber(h + 1)
+
+tapi.save_loc_to_file()

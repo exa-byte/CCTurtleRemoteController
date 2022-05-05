@@ -1,0 +1,614 @@
+-- github: https://github.com/exa-byte/CCTurtleRemoteController
+-- uses location api (https://github.com/lyqyd/LyqydNet-Programs/blob/master/apis/location) by lyqyd
+
+os.loadAPI("location")
+
+url = "http://localhost/api/"
+state_url = url .. "state/"
+local headers = {
+  ["Content-Type"] = "application/json"
+}
+local state = {
+  id = -1,
+  label = "",
+  loc = {
+    x = 0,
+    y = 0,
+    z = 0
+  }, -- relative location to app origin
+  rot = 0, -- look direction
+  inv = { -- will include sensed items in turtle inventory with turtle.getItemDetail(slot)
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  selectedSlot = -1,
+  view = { -- will include sensed blocks with turtle.inspect[...]
+    front = 0,
+    top = 0,
+    bottom = 0
+  },
+  fuelLevel = -1,
+  fuelLimit = -1
+}
+os.setComputerLabel("kukumba" .. tostring(os.getComputerID()))
+
+function send_status_update()
+  scan_surrounding_blocks()
+  scan_inventory()
+  scan_turtle_specs()
+
+  local state = textutils.serializeJSON(state)
+  http.request(state_url, state, headers)
+end
+
+local function does_side_have_inventory(side)
+  if not peripheral.isPresent(side) then return false end
+  return peripheral.hasType(side, "inventory")
+end
+
+function scan_surrounding_blocks()
+  local succ, block = turtle.inspect();
+  state.view.front = succ and block or 0
+  if succ and does_side_have_inventory("front") then
+    state.view.front.inventory = peripheral.call("front", "list")
+    state.view.front.inventorySize = peripheral.call("front", "size")
+  end
+  succ, block = turtle.inspectUp();
+  state.view.top = succ and block or 0
+  if succ and does_side_have_inventory("top") then
+    state.view.top.inventory = peripheral.call("top", "list")
+    state.view.top.inventorySize = peripheral.call("top", "size")
+  end
+  succ, block = turtle.inspectDown();
+  state.view.bottom = succ and block or 0
+  if succ and does_side_have_inventory("bottom") then
+    state.view.bottom.inventory = peripheral.call("bottom", "list")    
+    state.view.bottom.inventorySize = peripheral.call("bottom", "size")
+  end
+end
+
+function scan_inventory()
+  for i = 1, 16 do
+    local stack = turtle.getItemDetail(i)
+    state.inv[i] = stack or 0
+  end
+  state.selectedSlot = turtle.getSelectedSlot()
+end
+
+function scan_turtle_specs()
+  state.loc.x = tapi.getLoc().x
+  state.loc.y = tapi.getLoc().y
+  state.loc.z = tapi.getLoc().z
+  state.rot = tapi.getLoc().h - 1
+  state.id = os.getComputerID()
+  state.label = os.getComputerLabel() or ""
+  state.fuelLevel = turtle.getFuelLevel()
+  state.fuelLimit = turtle.getFuelLimit()
+end
+
+-- location functions
+
+function getLoc()
+  return loc_internal
+end
+
+function setLoc(loc_in)
+  loc_internal = loc_in
+end
+
+function save_loc_to_file()
+  send_status_update()
+  local f = fs.open("loc.sav", "w")
+  f.writeLine(loc_internal.x)
+  f.writeLine(loc_internal.y)
+  f.writeLine(loc_internal.z)
+  f.writeLine(loc_internal.h)
+  f.close()
+end
+
+function parse_user_location_input()
+  local input = io.read()
+  local splitInput = {}
+  local locAndHeading = {}
+  for substring in input:gmatch("%S+") do
+    table.insert(splitInput, substring)
+  end
+  for i=1,3 do
+  	locAndHeading[i] = tonumber(splitInput[i])
+	if locAndHeading[i] == nil then
+	  error(tostring(splitInput[i]) .. " is not a valid coordinate")
+	end
+  end
+	local h = string.lower(splitInput[4])
+	if     h == "west"  then locAndHeading[4] = 1
+	elseif h == "north" then locAndHeading[4] = 2
+	elseif h == "east"  then locAndHeading[4] = 3
+	elseif h == "south" then locAndHeading[4] = 4
+	else error(tostring(splitInput[4]) .. " is not a valid heading")
+  end
+  return locAndHeading
+end
+
+function load_loc_from_file()
+  -- load from file if exists, else create new one
+  local f = fs.open("loc.sav", "r")
+  if f then
+    loc_internal = location.new(tonumber(f.readLine()), tonumber(f.readLine()), tonumber(f.readLine()),
+      tonumber(f.readLine()))
+    f.close()
+  else
+    while true do
+      print("Could not load location, please stand on the turtle in forward direction and open F3 screen")
+      print("Please provide block coordinate and facing of the turtle: ")
+      print("e.g. -263 68 79 south")
+      
+      local status, res = pcall(parse_user_location_input)
+      if status then
+        loc_internal = location.new(unpack(res))
+        save_loc_to_file()
+        break
+      else print(res) end
+    end
+  end
+end
+load_loc_from_file()
+
+-- movement
+function up(count, reliable)
+  reliable = reliable or false
+  count = count or 1
+  local msg_written = false
+  for i = 1, count do
+    while not loc_internal:up() do
+      if not reliable then
+        return false, i - 1
+      end
+
+      if not msg_written then
+        print("cannot move up - pls remove block")
+        msg_written = true
+      end
+      os.sleep(1);
+    end
+    save_loc_to_file()
+  end
+  return true
+end
+u = up
+
+function down(count, reliable)
+  reliable = reliable or false
+  count = count or 1
+  local msg_written = false
+  for i = 1, count do
+    while not loc_internal:down() do
+      if not reliable then
+        return false, i - 1
+      end
+
+      if not msg_written then
+        print("cannot move down - pls remove block")
+        msg_written = true
+      end
+      os.sleep(1);
+    end
+    save_loc_to_file()
+  end
+  return true
+end
+d = down
+
+function forward(count, reliable)
+  reliable = reliable or false
+  count = count or 1
+  local msg_written = false
+  for i = 1, count do
+    while not loc_internal:forward() do
+      if not reliable then
+        return false, i - 1
+      end
+
+      if not msg_written then
+        print("cannot move forward - pls remove block")
+        msg_written = true
+      end
+      os.sleep(1);
+    end
+    save_loc_to_file()
+  end
+  return true
+end
+f = forward
+
+function back(count, reliable)
+  reliable = reliable or false
+  count = count or 1
+  local msg_written = false
+  for i = 1, count do
+    while not loc_internal:back() do
+      if not reliable then
+        return false, i - 1
+      end
+
+      if not msg_written then
+        print("cannot move back - pls remove block")
+        msg_written = true
+      end
+      os.sleep(1);
+    end
+    save_loc_to_file()
+  end
+  return true
+end
+b = back
+
+function move(dx, dy, dz, reliable) -- move the turtle by a given vector (moves x first z last), unreliable
+  print("move"..tostring(dx).." "..tostring(dx).." "..tostring(dx))
+  if dx ~= 0 then
+    turnTo((dx > 0) and 3 or 1)
+  end -- west => neg x
+  if not forward(math.abs(dx), reliable) then return false end
+  if (dy > 0) then
+    if not up(dy) then return false end
+  else
+    if not down(math.abs(dy), reliable) then return false end
+  end
+  if dz ~= 0 then
+    turnTo((dz > 0) and 4 or 2)
+  end -- north => negative z
+  if not forward(math.abs(dz), reliable) then return false end
+  return true
+end
+
+function goTo(x, y, z)
+  while not (loc_internal.x == x and loc_internal.y == y and loc_internal.z == z) do
+    local old_loc = loc_internal:tovector()
+    local dx = x - loc_internal.x
+    local dy = y - loc_internal.y
+    local dz = z - loc_internal.z
+
+    tapi.move(dx, 0, 0)
+    tapi.move(0, dy, 0)
+    tapi.move(0, 0, dz)
+
+    if (old_loc - loc_internal:tovector()):length() == 0 then return false end
+  end
+  return true
+end
+
+-- rotation
+function left(num_turns)
+  num_turns = num_turns or 1
+  for i = 1, num_turns do
+    loc_internal:left()
+    save_loc_to_file()
+  end
+  return true
+end
+l = left
+
+function right(num_turns)
+  num_turns = num_turns or 1
+  for i = 1, num_turns do
+    loc_internal:right()
+    save_loc_to_file()
+  end
+  return true
+end
+r = right
+
+function turnTo(heading)
+  return loc_internal:setHeading(heading)
+end
+face = turnTo
+
+-- placement
+function place(slot)
+  if slot then
+    select(slot)
+  end
+  return turtle.place()
+end
+p = place
+
+function placeDown(slot)
+  if slot then
+    select(slot)
+  end
+  return turtle.placeDown()
+end
+pd = placeDown
+
+function placeUp(slot)
+  if slot then
+    select(slot)
+  end
+  return turtle.placeUp()
+end
+pu = placeUp
+
+-- dig
+
+function dig()
+  local succ = turtle.dig()
+  send_status_update()
+  return succ
+end
+e = dig
+
+function digUp()
+  local succ = turtle.digUp()
+  send_status_update()
+  return succ
+end
+eu = digUp
+
+function digDown()
+  local succ = turtle.digDown()
+  send_status_update()
+  return succ
+end
+ed = digDown
+
+function digRepeat()
+  local succ
+  repeat
+    succ = turtle.dig()
+  until not succ
+  send_status_update()
+  return succ
+end
+e = dig
+
+function digUpRepeat()
+  local succ
+  repeat
+    succ = turtle.digUp()
+  until not succ
+  send_status_update()
+  return succ
+end
+eu = digUp
+
+function digDownRepeat()
+  local succ
+  repeat
+    succ = turtle.digDown()
+  until not succ
+  send_status_update()
+  return succ
+end
+ed = digDown
+
+function digSide(side)
+  if not side then return false, "side must not be nil" end
+  if side == "front"  then return dig() end
+  if side == "top"    then return digUp() end
+  if side == "bottom" then return digDown() end
+end
+
+-- sucking
+
+function suck()
+  turtle.suck()
+  send_status_update()
+end
+
+function suckUp()
+  turtle.suckUp()
+  send_status_update()
+end
+
+function suckDown()
+  turtle.suckDown()
+  send_status_update()
+end
+
+function suckAll()
+  suck()
+  suckUp()
+  suckDown()
+end
+
+-- drop
+
+function drop(slot)
+  if slot then
+    select(slot)
+  end
+  turtle.drop()
+  send_status_update()
+end
+
+function dropUp(slot)
+  if slot then
+    select(slot)
+  end
+  turtle.dropUp()
+  send_status_update()
+end
+
+function dropDown(slot)
+  if slot then
+    select(slot)
+  end
+  turtle.dropDown()
+  send_status_update()
+end
+
+-- fuel
+
+function request_fuel()
+  while turtle.getFuelLevel() < 100 do
+    print("refuel needed: put fuel into selected slot and press enter")
+    read()
+    turtle.refuel()
+  end
+end
+
+function refuel(count)
+  turtle.refuel(count)
+  send_status_update()
+end
+
+-- inventory
+function select(slot)
+  if not slot then return false end
+  if turtle.getSelectedSlot() == slot then return true end
+  local succ = turtle.select(slot)
+  send_status_update()
+  return succ
+end
+
+function findItem(name)
+  for i = 1, 16 do
+    local stack = turtle.getItemDetail(i)
+    if stack and stack.name == name then
+      return i
+    end
+  end
+  return false
+end
+
+-- get the first item where the string is contained in the id of the item
+-- e.g. when you input "chest" and there is a "ironchest:diamond_chest" in the turtle that slot will be returned
+function findItemFuzzy(string)
+  for i = 1, 16 do
+    local stack = turtle.getItemDetail(i)
+    if stack and string.find(stack.name, string) then
+      return i
+    end
+  end
+  return false
+end
+
+function selectItem(name)
+  local found = findItem(name)
+  if found == false then
+    return false
+  end
+  return select(found)
+end
+
+function contains_items(name, req_count, meta)
+  local count = 0
+  for i = 1, 16 do
+    local stack = turtle.getItemDetail(i)
+    if stack and stack.name == name and (not meta or stack.damage == meta) then
+      count = count + stack.count
+      if count >= req_count then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+function contains_all_items(item_list)
+  for _, item in pairs(item_list) do
+    if not contains_items(item.name, item.count, item.meta) then
+      return false
+    end
+  end
+  return true
+end
+
+function craft(times)
+  turtle.craft(times)
+  send_status_update()
+end
+
+-- will pull item from one adjacent inventory to another
+function moveItemsBetweenInventories(sourceInvSide, destInvSide, itemName, count)
+  src = peripheral.wrap(sourceInvSide)
+  if not src then print("src inventory (" .. tostring(sourceInvSide) .. ") is not available"); return false end
+  
+  for slot, item in pairs(src.list()) do 
+    print(("%d x %s in slot %d"):format(item.count, item.name, slot)) 
+  end
+
+  dst = peripheral.wrap(destInvSide)
+  if not dst then print("src inventory (" .. tostring(sourceInvSide) .. ") is not available"); return false end
+end
+
+-- itemList format: e.g.: {{count=5, name="minecraft:torch"}, {count=1, name="minecraft:cobblestone"}}
+-- returns true if all items in itemList are in the chest or false, missingItemList else
+function doesChestContainItemList(itemList, inventorySide)
+  -- make a copy of itemList
+  local _itemList = {}
+  for pos, wantStack in pairs(itemList) do
+    table.insert(_itemList, pos, { name=wantStack.name, count=wantStack.count })
+  end
+
+  -- iterate chestItems and subtract from _wantList
+  local chestItems = peripheral.call(inventorySide, "list")
+  if not chestItems then return false end
+  for i, wantStack in pairs(_itemList) do
+    for j, haveStack in pairs(chestItems) do
+      if haveStack.name == wantStack.name then
+        _itemList[i].count = wantStack.count - math.min(haveStack.count, wantStack.count)
+      end
+    end
+  end
+
+  -- check if there are non zero entries left in the itemList
+  for _, wantStack in pairs(_itemList) do
+    if wantStack.count > 0 then return false, _itemList end
+  end
+  return true
+end
+
+-- places a chest to pull specific items from an inventory, then sucks the items from the intermediate chest
+-- !!! requires a chest in the inventory !!!
+function pullItemsFromChest(itemList, inventorySide, allowPartial)
+  -- TODO: check if the result will actually fit in the turtle
+  local srcChest = peripheral.wrap(inventorySide)
+  if not srcChest then return false, "no valid inventory at side" .. tostring(inventorySide) end
+  if not allowPartial and not doesChestContainItemList(itemList, inventorySide) then return false, "chest is missing items" end
+  -- place intermediate chest
+  local side, err = placeIntermediateChest()
+  if not side then return false, err end
+
+  local _itemList = {}
+  for pos, wantStack in pairs(itemList) do
+    table.insert(_itemList, pos, { name=wantStack.name, count=wantStack.count })
+  end
+
+  -- iterate chestItems and subtract from _wantList
+  os.sleep(.5)
+  local tmpChest = peripheral.wrap(side)
+  if not tmpChest then return false, "temp chest could not be found" end
+  local chestItems = srcChest.list()
+  if not chestItems then return false, "pull inventory does not exist" end
+  for i, wantStack in pairs(_itemList) do
+    for j, haveStack in pairs(chestItems) do
+      if haveStack.name == wantStack.name then
+        local transferCount = srcChest.pushItems(peripheral.getName(tmpChest), j, _itemList[i].count)
+        _itemList[i].count = _itemList[i].count - transferCount
+      end
+    end
+  end
+
+  if allowPartial then return true, _itemList end
+
+  -- check if there are non zero entries left in the itemList
+  for _, wantStack in pairs(_itemList) do
+    if wantStack.count > 0 then return false, _itemList end
+  end
+  digSide(side)
+  return true
+end
+
+-- intermediate chest functionality
+
+-- try placing down intermediate chest
+-- @param chestId string|nil mc id of the intermediate chest or nil for default
+function placeIntermediateChest(chestId)
+  chestId = chestId or "chest"
+  if not select(findItemFuzzy(chestId)) then return false, "could not find intermediate chest in inventory" end
+  local side
+  if     placeUp()   then side = "top"
+  elseif placeDown() then side = "bottom"
+  elseif place()     then side = "front"
+  end
+  if not side then return false, "can not place intermediate chest anywhere" end
+  return side
+end
