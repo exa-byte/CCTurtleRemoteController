@@ -1,5 +1,6 @@
 # CCTurtleRemoteController
-A node server with user interface for remote controlling your computercraft turtles via the http api.
+A node server with user interface for remote controlling your computercraft turtles in your browser via the http api.
+<img width="960" alt="image" src="https://user-images.githubusercontent.com/14824895/166954166-ecf32647-2f5f-4cff-bf16-a79f6dba9573.png">
 
 **Setup**
 
@@ -22,6 +23,14 @@ A node server with user interface for remote controlling your computercraft turt
 The ui supports textured blocks and items. They are just not included here for license reasons. If you want to, you can extract the block textures from your `/minecraft/versions/YOUR_VERSION/x.xx.x.jar` and paste them into `textures/blocks/minecraft/`.
 Same goes for items which go into `textures/items/minecraft/`. However normal block icons are not included, you will have to render them yourself from the blocktextures or get them from somewhere else (I used https://www.npmjs.com/package/minecraft-blocks-render).
 If you have other mods installed you can also extract the textures in the same way, except that the textures then go into `textures/blocks/yourmodname/` and `textures/items/yourmodname/` respectively.
+
+**Random info**
+
+- you can double click a block and the selected turtle will try to move there with a very simple algorithm
+- hovering over a block will show its id in the top right corner along with its coordinates
+- you can click a chest to open a window displaying its contents, however interaction is not implemented yet
+- you can drag and drop between turtle inventory slots hold `ctrl` for moving a whole stack
+- the bar below the turtle inventory is the turtles fuel gauge and shows the number of blocks you can move with the current fuel level
    
 **Keyboard bindings**
    
@@ -37,5 +46,5 @@ If you have other mods installed you can also extract the textures in the same w
   
 **Known Bugs**
   
-* there is a bug in the transaction code which desyncs the ui block world state from the servers' - a page reload fixes this temporarily
+* there is a bug in the transaction code which desyncs the ui block world state from the servers' - a page reload fixes this temporarily; you can also revert to my previous technique of sending the whole state every request by inserting `res.send({ state: state }); return;` as the first line after `app.post('/api/getStateUpdate', (req, res) => {` in the `server.js`.
   
