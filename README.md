@@ -8,7 +8,7 @@ A node server with user interface for remote controlling your computercraft turt
 2. Install Node.js including npm (https://nodejs.org/en/)
 3. Run `npm install` in the root directory of the repo
 4. Now you have 2 options, pick one of them:
-    * setup port forwarding and replace every localhost with your public ip address
+    * setup port forwarding and replace every localhost in the code (server, ui, turtle) with your public ip address
     * allow http calls to localhost in your <mcsavegame>/serverconfig/computercraft-server.toml
 6. Build the frontend using `npm run build`
 7. Run the server: `npm run server`
