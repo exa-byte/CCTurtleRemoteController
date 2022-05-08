@@ -31,6 +31,9 @@ If you have other mods installed you can also extract the textures in the same w
 - you can click a chest to open a window displaying its contents, however interaction is not implemented yet
 - you can drag and drop between turtle inventory slots hold `ctrl` for moving a whole stack
 - the bar below the turtle inventory is the turtles fuel gauge and shows the number of blocks you can move with the current fuel level
+- unfortunately some minecraft block textures are not easily extractable and have to be handled with extra steps (e.g. chest, furnace, leaf blocks that are greyscale)
+- the turtles are controlled via a command queue, that means if you spam a button 10 times a second the turtle will not ignore the 9 times it is not able to perform that second but will execute them as fast as it can; the command queue can be cleared with the 'del' key (if you spammed it too much)
+- if you don't have a chunkloader you will have to stay in render distance of the turtle, else the currently running program will be stopped and cannot be easily continued (the turtle will restart and reconnect when you come into range again though)
    
 **Keyboard bindings**
    
