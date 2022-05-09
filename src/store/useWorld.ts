@@ -8,6 +8,7 @@ export const useWorldStore = defineStore('world', {
   state: () => ({
     turtles: {} as { [id: string]: TurtleState; },
     blocks: {} as { [locString: string]: Block; },
+    commandResult: {} as { [id: string]: string; },
     URL: `${url}`,
     apiURL: `${url}api/`,
     textureURL: `${url}textures/`,
@@ -16,7 +17,7 @@ export const useWorldStore = defineStore('world', {
   getters: {
     getTurtleIds(): number[] {
       return Object.keys(this.turtles).map(key => Number(key));
-    }
+    },
   },
   actions: {
     setTurtleStatus(remoteTurtleState: any) {

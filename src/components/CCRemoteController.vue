@@ -4,9 +4,17 @@
       <select v-model="worldView.selectedTurtleId">
         <option v-for="key in world.getTurtleIds" :key="key">{{ key }}</option>
       </select>
-      <TurtlePanel v-if="Number(worldView.selectedTurtleId) != -1" :turtleId="Number(worldView.selectedTurtleId)"/>
+      <TurtlePanel
+        v-if="Number(worldView.selectedTurtleId) != -1"
+        :turtleId="Number(worldView.selectedTurtleId)"
+      />
     </div>
-    <Inventory v-if="worldView.selectedInventory" :inventory="worldView.selectedInventory" :inventorySize="worldView.selectedInventorySize" style="grid-column: 2"/>
+    <Inventory
+      v-if="worldView.selectedInventory"
+      :inventory="worldView.selectedInventory"
+      :inventorySize="worldView.selectedInventorySize"
+      style="grid-column: 2"
+    />
     <Scene />
     <KeyboardBindings />
     <BlockNameDisplay />
@@ -16,7 +24,7 @@
 <style scoped>
 .hud {
   position: absolute;
-  display:grid;
+  display: grid;
 }
 </style>
 
@@ -25,7 +33,7 @@ import { defineComponent } from "vue";
 import { useWorldStore } from "../store/useWorld";
 import { useWorldViewStore } from "../store/useWorldView";
 import TurtlePanel from "./TurtlePanel.vue";
-import Inventory from "./Inventory.vue"
+import Inventory from "./Inventory.vue";
 import BlockNameDisplay from "./BlockNameDisplay.vue";
 import Scene from "./Scene.vue";
 import KeyboardBindings from "./KeyboardBindings.vue";
@@ -41,7 +49,13 @@ export default defineComponent({
       turtleId: -1 as Number,
     };
   },
-  components: { TurtlePanel, Scene, BlockNameDisplay, Inventory, KeyboardBindings },
+  components: {
+    TurtlePanel,
+    Scene,
+    BlockNameDisplay,
+    Inventory,
+    KeyboardBindings,
+  },
   methods: {
     pollStatus() {
       const world = useWorldStore();
@@ -64,11 +78,29 @@ export default defineComponent({
             world.blocks = data.state.world.blocks;
             worldView.regenerateSceneFromBlocks();
             world.lastTransactionId = data.state.lastTransactionId;
-          }
-          else {
+          } else {
             world.applyTransactions(data.transactions);
           }
           worldView.render();
+        });
+
+      fetch(world.apiURL + "getCommandResult", {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          turtleId: worldView.selectedTurtleId,
+          getOnlyLatest: true,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.result) {
+            world.commandResult[data.turtleId] = data.result.ret;
+          }
         });
       setTimeout(() => this.pollStatus(), 400);
     },

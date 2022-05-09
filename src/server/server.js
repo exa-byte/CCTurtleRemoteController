@@ -31,9 +31,9 @@ let state = {
   lastTransactionId: 0,
   lastReadyTransactionId: 0,
 }
-let transactionCache = {
-
-}
+let transactionCache = {}
+let commandResultCache = {}
+let cmds = {}
 
 try {
   let fs = require('fs');
@@ -42,10 +42,6 @@ try {
   state.lastReadyTransactionId = 0;
 }
 catch { }
-
-let cmds = {
-
-}
 
 // transaction has format : { id: number, blocks: { [locstring] : BlockState | null }}
 function applyTransaction(transaction, state, transactionCache) {
@@ -146,9 +142,25 @@ app.post('/api/getCommand', (req, res) => {
 });
 
 app.post('/api/commandResult', (req, res) => {
-  let s = req.body;
-  // console.log('/api/commandResult');
+  console.log('/api/commandResult');
+  let turtleId = req.body.turtleId;
+  if (!commandResultCache[turtleId]) commandResultCache[turtleId] = [];
+  commandResultCache[turtleId].push(req.body.result);
   res.sendStatus(200)
+});
+
+app.post('/api/getCommandResult', (req, res) => {
+  let turtleId = req.body.turtleId;
+  if (!commandResultCache[turtleId]) {
+    res.send({});
+    return;
+  }
+  if (req.body.getOnlyLatest) {
+    res.send({ turtleId, result: commandResultCache[turtleId].at(-1) });
+    return;
+  }
+  let startIndex = req.body.lastReceivedIndex ? req.body.lastReceivedIndex + 1 : 0;
+  res.send({ turtleId, cmdResults: commandResultCache[turtleId].slice(startIndex) })
 });
 
 app.post('/api/setCommand', (req, res) => {
@@ -178,4 +190,4 @@ app.post('/api/saveState', (req, res) => {
   res.send(200)
 });
 
-app.listen(80, () => console.log('Example app is listening on port 80.'));
+app.listen(80, () => console.log('Turtle remote controller server is listening on port 80.'));

@@ -5,7 +5,7 @@ local get_command_url = tapi.url .. "getCommand/"
 local command_result_url = tapi.url .. "commandResult/"
 
 function send_command_result(succ, ret)
-    local cmd_result = textutils.serializeJSON({succ=succ, ret=ret})
+    local cmd_result = textutils.serializeJSON({turtleId=os.getComputerID(), result={succ=succ, ret=ret}})
     -- print("sending cmd_result: " .. tostring(succ) .. ", " .. tostring(ret))
     local res = http.post(command_result_url, cmd_result, {["Content-Type"] = "application/json"})
     if res then --[[print(res.readAll())]] res.close() end
@@ -20,6 +20,7 @@ function get_command()
     local res = http.post(get_command_url, json, {["Content-Type"] = "application/json"})
     if res then
         local cmd_string = res.readAll()
+        if cmd_string == "" then res.close(); return end
         local cmd, err = loadstring(cmd_string)
         if cmd then
             if #cmd_string > 0 then print("executing cmd: " .. cmd_string) end
