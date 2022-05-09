@@ -24,8 +24,8 @@ dist-ssr
 *.sw?
 
 # textures
-textures/blocks/minecraft/*
-textures/items/minecraft/*
+textures/blocks/*/*
+textures/items/*/*
 !/**/.gitkeep
 
 # saved state
