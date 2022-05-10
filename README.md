@@ -5,7 +5,7 @@ A node server with user interface for remote controlling your computercraft turt
 **Setup**
 
 1. Clone this repo
-2. Install Node.js including npm (https://nodejs.org/en/)
+2. Install Node.js including npm (https://nodejs.org/en/) or make sure you update the version you are using else it will likely cause some errors.
 3. Run `npm install` in the root directory of the repo
 4. Now you have 2 options, pick one of them:
     * setup port forwarding and replace every localhost in the code (server, ui, turtle) with your public ip address
