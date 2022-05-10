@@ -13,7 +13,7 @@ A node server with user interface for remote controlling your computercraft turt
 6. Build the frontend using `npm run build`
 7. Run the server: `npm run server`
 8. You can now reach the ui from http://localhost/ or your public ip address if you chose the second option in step 4
-9. Add any amount of turtles by running `wget run https://raw.githubusercontent.com/exa-byte/CCTurtleRemoteController/main/turtle/startup` in the turtles command line and following the displayed instructions
+9. Add any amount of turtles by running `wget run http://localhost/turtle/startup` or `wget run http://<yourip>/turtle/startup` in the turtles command line and following the displayed instructions
 10. You can now select a turtle id in the top left corner of the ui and press the `toggle follow` button to move the camera to it
 11. The selected turtle can be controlled by the buttons on the interface or some basic keyboard shortcuts (wasdqe)
 12. You can also directly input code to be executed on the turtle, however if you use the native move functions of the turtle, you will desync the turtle location - use the `tapi` library equivalents instead
