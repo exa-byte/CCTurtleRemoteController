@@ -9,6 +9,7 @@ import { useWorldViewStore } from "../store/useWorldView";
 import * as THREE from "three";
 import CameraControls from "camera-controls";
 import { PerspectiveCamera, Scene } from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { Block } from "../types/types";
 import BlockRenderStructure from "../utils/BlockRenderStructure";
 import DynamicInstancedMesh from "../utils/DynamicInstancedMesh";
@@ -23,6 +24,7 @@ var scene: Scene,
   raycaster: THREE.Raycaster,
   clock: THREE.Clock,
   mouse = { x: 0, y: 0 },
+  turtleModel: THREE.Object3D,
   blockMeshes: BlockRenderStructure;
 
 export default defineComponent({
@@ -42,6 +44,14 @@ export default defineComponent({
       renderer.render(scene, camera);
     },
     initScene() {
+      const loader = new GLTFLoader();
+
+      loader.load(
+        "textures/turtle/CCTurtle.glb",
+        (gltf) => (turtleModel = gltf.scene),
+        undefined,
+        (error) => console.error(error)
+      );
       renderer = new THREE.WebGLRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -49,10 +59,18 @@ export default defineComponent({
       renderer.domElement.addEventListener(
         "dblclick",
         (e) => {
-          this.raycast(e)
-          if (isNaN(this.worldView.selectedTurtleId) || this.worldView.selectedTurtleId == -1 || this.worldView.gotoBlockPos == null) return;
+          this.raycast(e);
+          if (
+            isNaN(this.worldView.selectedTurtleId) ||
+            this.worldView.selectedTurtleId == -1 ||
+            this.worldView.gotoBlockPos == null
+          )
+            return;
           const hLoc = this.worldView.gotoBlockPos;
-          this.world.sendCommand(this.worldView.selectedTurtleId, "tapi.goTo(" + hLoc.x + "," + hLoc.y + "," + hLoc.z + ")");
+          this.world.sendCommand(
+            this.worldView.selectedTurtleId,
+            "tapi.goTo(" + hLoc.x + "," + hLoc.y + "," + hLoc.z + ")"
+          );
         },
         false
       );
@@ -60,14 +78,18 @@ export default defineComponent({
       renderer.domElement.addEventListener(
         "click",
         (e) => {
-          this.raycast(e)
-          if (this.worldView.hoveredBlock && this.worldView.hoveredBlock.inventory) { 
-            this.worldView.selectedInventory = this.worldView.hoveredBlock.inventory; 
-            this.worldView.selectedInventorySize = this.worldView.hoveredBlock.inventorySize as number; 
-          }
-          else {
-            this.worldView.selectedInventory = null; 
-            this.worldView.selectedInventorySize = 0; 
+          this.raycast(e);
+          if (
+            this.worldView.hoveredBlock &&
+            this.worldView.hoveredBlock.inventory
+          ) {
+            this.worldView.selectedInventory =
+              this.worldView.hoveredBlock.inventory;
+            this.worldView.selectedInventorySize = this.worldView.hoveredBlock
+              .inventorySize as number;
+          } else {
+            this.worldView.selectedInventory = null;
+            this.worldView.selectedInventorySize = 0;
           }
         },
         false
@@ -104,11 +126,16 @@ export default defineComponent({
       instMesh.getMatrixAt(<number>intersection.instanceId, transform);
       let instPos = new THREE.Vector3().setFromMatrixPosition(transform);
       let offset = intersection.point.clone().sub(instPos);
-      let vabs = new THREE.Vector3(Math.abs(offset.x), Math.abs(offset.y), Math.abs(offset.z)).toArray();
+      let vabs = new THREE.Vector3(
+        Math.abs(offset.x),
+        Math.abs(offset.y),
+        Math.abs(offset.z)
+      ).toArray();
       let idx = vabs.indexOf(Math.max(...vabs));
       let discreteOffset = new THREE.Vector3(0, 0, 0);
       for (let i = 0; i < 3; i++) {
-        if (i == idx) discreteOffset.setComponent(i, offset.getComponent(i) > 0 ? 1 : -1);
+        if (i == idx)
+          discreteOffset.setComponent(i, offset.getComponent(i) > 0 ? 1 : -1);
       }
       return instPos.clone().add(discreteOffset);
     },
@@ -152,7 +179,9 @@ export default defineComponent({
         let instPos = new THREE.Vector3().setFromMatrixPosition(transform);
         this.worldView.hoveredBlock = this.world.getBlockByObjPosition(instPos);
         this.worldView.hoveredBlockPos = instPos;
-        this.worldView.gotoBlockPos = this.getGotoBlockPosFromIntersect(intersects[i]);
+        this.worldView.gotoBlockPos = this.getGotoBlockPosFromIntersect(
+          intersects[i]
+        );
         return;
         /*
           An intersection has the following properties :
@@ -217,12 +246,13 @@ export default defineComponent({
       }
     },
     addTurtle(turtleId: string) {
-      const geometry = new THREE.ConeGeometry(0.5, 1, 8);
-      const material = new THREE.MeshPhongMaterial({
-        color: 0xffff00,
-        flatShading: true,
-      });
-      const turtle = new THREE.Mesh(geometry, material);
+      // const geometry = new THREE.ConeGeometry(0.5, 1, 8);
+      // const material = new THREE.MeshPhongMaterial({
+      //   color: 0xffff00,
+      //   flatShading: true,
+      // });
+      // const turtle = new THREE.Mesh(geometry, material);
+      const turtle = turtleModel.clone()
       scene.add(turtle);
       this.worldView.turtles[turtleId] = turtle;
       const turtleData = this.world.turtles[turtleId];

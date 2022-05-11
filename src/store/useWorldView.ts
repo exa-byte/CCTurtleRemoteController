@@ -26,7 +26,7 @@ export const useWorldViewStore = defineStore('worldView', {
     hoveredBlockPos: null as THREE.Vector3 | null,
     gotoBlockPos: null as THREE.Vector3 | null,
     selectedTurtleId: -1 as number,
-    turtles: {} as { [id: string]: THREE.Mesh; },
+    turtles: {} as { [id: string]: THREE.Object3D; },
     blockMeshes: {} as { [id: string]: THREE.Mesh; },
     selectedInventory: null as Inventory | null,
     selectedInventorySize: 0 as number,
