@@ -4,7 +4,7 @@ A node server with user interface for remote controlling your computercraft turt
 
 **Setup**
 
-1. Clone this repo
+1. Clone this repo or download it as zip and extract it
 2. Install Node.js including npm (https://nodejs.org/en/) or make sure you update the version you are using else it will likely cause some errors.
 3. Run `npm install` in the root directory of the repo
 4. Now you have 2 options, pick one of them:
