@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { Block, Inventory } from '../types/types';
 import { useWorldStore } from './useWorld';
 
+const BIOME_TINT = 0x88C149;
 
 export const useWorldViewStore = defineStore('worldView', {
   state: () => ({
@@ -25,6 +26,19 @@ export const useWorldViewStore = defineStore('worldView', {
     turtles: {} as { [id: string]: THREE.Object3D; },
     selectedInventory: null as Inventory | null,
     selectedInventorySize: 0 as number,
+    blockTint: {
+      "minecraft:grass": BIOME_TINT,
+      "minecraft:grass_block": BIOME_TINT,
+      "minecraft:acacia_leaves": BIOME_TINT,
+      "minecraft:birch_leaves": 0x80a755,
+      "minecraft:dark_oak_leaves": BIOME_TINT,
+      "minecraft:jungle_leaves": BIOME_TINT,
+      "minecraft:oak_leaves": BIOME_TINT,
+      "minecraft:spruce_leaves": 0x619961,
+      "minecraft:fern": BIOME_TINT,
+      "minecraft:vine": BIOME_TINT,
+      "minecraft:lily_pad": BIOME_TINT,
+    } as { [id: string]: number; }
   }),
   getters: {
 
@@ -47,6 +61,8 @@ export const useWorldViewStore = defineStore('worldView', {
             texture.magFilter = THREE.NearestFilter;
             this.materials[id].map = texture;
             this.materials[id].color.setHex(0xffffff);
+            const tint = this.blockTint[id];
+            if (tint) this.materials[id].color.setHex(tint);
             this.materials[id].needsUpdate = true;
           },
 
