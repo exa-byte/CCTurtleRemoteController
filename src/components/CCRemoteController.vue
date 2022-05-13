@@ -82,7 +82,8 @@ export default defineComponent({
             world.applyTransactions(data.transactions);
           }
           worldView.render();
-        });
+        })
+        .finally(() => setTimeout(() => this.pollStatus(), 400));
 
       fetch(world.apiURL + "getCommandResult", {
         method: "POST",
@@ -101,8 +102,7 @@ export default defineComponent({
           if (data.result) {
             world.commandResult[data.turtleId] = data.result.ret;
           }
-        })
-        .finally(() => setTimeout(() => this.pollStatus(), 400));
+        });
     },
   },
   mounted() {
