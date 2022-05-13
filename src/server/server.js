@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const compression = require('compression')
 const { Vector3 } = require('math3d');
 const fs = require('fs');
 const app = express();
@@ -101,11 +102,11 @@ function extractState(turtleState, state) {
   return transaction;
 }
 
-app.get('/api/state', (req, res) => {
+app.get('/api/state', compression(), (req, res) => {
   res.send(state);
 });
 
-app.post('/api/getStateUpdate', (req, res) => {
+app.post('/api/getStateUpdate', compression(), (req, res) => {
   const useOldStateUpdateMethod = false; // until the transaction-only update method works bug free, use the old method
   if (useOldStateUpdateMethod) { res.send({ state: state }); return; }
   console.log(`${req.body.lastTransactionId} | ${state.lastReadyTransactionId} | ${state.lastTransactionId}`);
@@ -152,7 +153,7 @@ app.post('/api/commandResult', (req, res) => {
   res.sendStatus(200)
 });
 
-app.post('/api/getCommandResult', (req, res) => {
+app.post('/api/getCommandResult', compression(), (req, res) => {
   let turtleId = req.body.turtleId;
   if (!commandResultCache[turtleId]) {
     res.send({});
