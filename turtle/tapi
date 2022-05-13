@@ -41,7 +41,12 @@ end
 
 local function does_side_have_inventory(side)
   if not peripheral.isPresent(side) then return false end
-  return peripheral.hasType(side, "inventory")
+  if not peripheral.hasType then
+    -- added for backwards compatability
+    return peripheral.getType(side) == "inventory"
+  else
+    return peripheral.hasType(side, "inventory")
+  end
 end
 
 function scan_surrounding_blocks()
