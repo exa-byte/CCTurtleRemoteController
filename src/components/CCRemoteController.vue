@@ -101,12 +101,12 @@ export default defineComponent({
           if (data.result) {
             world.commandResult[data.turtleId] = data.result.ret;
           }
-        });
-      setTimeout(() => this.pollStatus(), 400);
+        })
+        .finally(() => setTimeout(() => this.pollStatus(), 400));
     },
   },
   mounted() {
-    setTimeout(() => this.pollStatus(), 400);
+    this.pollStatus();
   },
 });
 </script>

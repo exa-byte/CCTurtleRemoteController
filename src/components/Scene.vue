@@ -95,7 +95,7 @@ export default defineComponent({
         false
       );
 
-      renderer.domElement.addEventListener("mousemove", this.raycast, false);
+      // renderer.domElement.addEventListener("mousemove", this.raycast, false);
 
       window.addEventListener("resize", this.onWindowResize, false);
 
@@ -235,7 +235,6 @@ export default defineComponent({
         Number(coords[2])
       );
       blockMeshes.addBlock(locString, block);
-      console.log(`blockmeshes.addblock(${locString}`);
     },
     removeBlock(locString: string) {
       blockMeshes.removeBlock(locString);

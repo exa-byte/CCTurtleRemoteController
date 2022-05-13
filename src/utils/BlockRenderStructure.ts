@@ -11,6 +11,7 @@ class BlockRenderStructure {
   geometry: BoxGeometry;
 
   constructor(parentSceneObject: Object3D) {
+    // console.log("New BlockRenderStructure created");
     this.meshArray = parentSceneObject.children as DynamicInstancedMesh[];
     this.geometry = new BoxGeometry();
   }
@@ -19,11 +20,15 @@ class BlockRenderStructure {
     const worldView = useWorldViewStore();
 
     // create new mesh if none exists
+    // console.log(`Old array: `); console.log(this.meshArray);
     let instMeshIdx = this.blockToMeshIdxMap[block.name];
-    if (!instMeshIdx) {
+    if (instMeshIdx === undefined) {
+      // console.log(`Creating mesh for new block type: ${block.name}`);
       let newMesh = new DynamicInstancedMesh(this.geometry, worldView.getBlockMaterial(block.name));
       instMeshIdx = this.meshArray.push(newMesh) - 1;
       this.blockToMeshIdxMap[block.name] = instMeshIdx;
+      // console.log(`New array: `); console.log(this.meshArray);
+      // console.log(`New blockToMeshIdxMap: `); console.log(this.blockToMeshIdxMap);
     }
     instMeshIdx = this.blockToMeshIdxMap[block.name];
     let mesh = this.meshArray[instMeshIdx];

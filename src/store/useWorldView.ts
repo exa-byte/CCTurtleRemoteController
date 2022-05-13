@@ -6,10 +6,6 @@ import { useWorldStore } from './useWorld';
 
 export const useWorldViewStore = defineStore('worldView', {
   state: () => ({
-    // scene: null as unknown as THREE.Scene,
-    // camera: null as unknown as THREE.PerspectiveCamera,
-    // controls: null as unknown as OrbitControls,
-    // renderer: null as unknown as THREE.WebGLRenderer,
     regenerateSceneFromBlocks: () => { },
     render: () => { },
     setCameraFocus: (target: THREE.Vector3) => { },
@@ -27,7 +23,6 @@ export const useWorldViewStore = defineStore('worldView', {
     gotoBlockPos: null as THREE.Vector3 | null,
     selectedTurtleId: -1 as number,
     turtles: {} as { [id: string]: THREE.Object3D; },
-    blockMeshes: {} as { [id: string]: THREE.Mesh; },
     selectedInventory: null as Inventory | null,
     selectedInventorySize: 0 as number,
   }),

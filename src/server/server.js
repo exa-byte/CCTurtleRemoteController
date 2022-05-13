@@ -3,6 +3,10 @@ const cors = require('cors');
 const { Vector3 } = require('math3d');
 const fs = require('fs');
 const app = express();
+const httpTerminator = require('http-terminator');
+
+const AUTOSAVE_INTERVAL_MIN = 1;
+const TRANSACTION_CACHE_COUNT = 10000;
 
 app.use(cors({
   origin: 'http://localhost:3000'
@@ -55,8 +59,8 @@ function applyTransaction(transaction, state, transactionCache) {
 
   // cache transaction
   transactionCache[transaction.id] = transaction;
-  // keep only last 500 transactions in cache
-  if (transactionCache[transaction.id - 500]) delete transactionCache[transaction.id - 500]
+  // keep only last TRANSACTION_CACHE_COUNT transactions in cache
+  if (transactionCache[transaction.id - TRANSACTION_CACHE_COUNT]) delete transactionCache[transaction.id - TRANSACTION_CACHE_COUNT]
 }
 
 function Vec3toString(vec) {
@@ -102,13 +106,13 @@ app.get('/api/state', (req, res) => {
 });
 
 app.post('/api/getStateUpdate', (req, res) => {
-  const useOldStateUpdateMethod = true; // until the transaction-only update method works bug free, use the old method
+  const useOldStateUpdateMethod = false; // until the transaction-only update method works bug free, use the old method
   if (useOldStateUpdateMethod) { res.send({ state: state }); return; }
-  // console.log(`${req.body.lastTransactionId} | ${state.lastReadyTransactionId} | ${state.lastTransactionId}`);
+  console.log(`${req.body.lastTransactionId} | ${state.lastReadyTransactionId} | ${state.lastTransactionId}`);
   // if no remote last transaction is given, send complete state
-  if (!req.body.lastTransactionId) { res.send({ state: state }); return; }
+  if (!req.body.lastTransactionId == -1) { res.send({ state: state }); return; }
   // if frontend last transaction > server last transaction, send complete state
-  if (req.body.lastReadyTransactionId > state.lastReadyTransactionId) { res.send({ state: state }); return; }
+  if (req.body.lastTransactionId > state.lastReadyTransactionId) { res.send({ state: state }); return; }
   let newTransactionId = req.body.lastTransactionId + 1;
   let resJson = { transactions: {} }
   // if no further transactions happened since the remote last transaction return empty transaction obj
@@ -125,7 +129,6 @@ app.post('/api/getStateUpdate', (req, res) => {
 app.post('/api/state', (req, res) => {
   let s = req.body;
   applyTransaction(extractState(s, state), state, transactionCache);
-  fs.writeFileSync('./src/server/saved_state.json', JSON.stringify(state));
   // console.log(s);
   res.sendStatus(200)
 });
@@ -186,8 +189,29 @@ app.get('/api/turtleFileNames', (req, res) => {
 });
 
 app.post('/api/saveState', (req, res) => {
-  fs.writeFileSync('./src/server/saved_state.json', JSON.stringify(state));
+  saveStateToDisk();
   res.send(200)
 });
 
-app.listen(80, () => console.log('Turtle remote controller server is listening on port 80.'));
+function saveStateToDisk() {
+  fs.writeFileSync('./src/server/saved_state.json', JSON.stringify(state));
+}
+
+function autoSave() {
+  saveStateToDisk();
+  setTimeout(() => autoSave(), AUTOSAVE_INTERVAL_MIN * 60 * 1000);
+}
+
+const server = app.listen(80, () => console.log('Turtle remote controller server is listening on port 80.'));
+autoSave();
+
+const terminator = httpTerminator.createHttpTerminator({
+  gracefulTerminationTimeout: 200,
+  server,
+});
+
+process.on('SIGINT', async () => {
+  await terminator.terminate();
+  saveStateToDisk();
+  process.exit(0);
+});

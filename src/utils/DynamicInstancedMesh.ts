@@ -22,6 +22,7 @@ class DynamicInstancedMesh extends InstancedMesh {
       Number(coords[1]),
       Number(coords[2]));;
     this.setMatrixAt(this.count, mat);
+    this.instanceMatrix.needsUpdate = true;
     this.locStringToInstance.add(locString, this.count);
     this.count++;
   }
@@ -33,6 +34,7 @@ class DynamicInstancedMesh extends InstancedMesh {
     let mat = new Matrix4();
     this.getMatrixAt(this.count - 1, mat);
     this.setMatrixAt(remIdx, mat);
+    this.instanceMatrix.needsUpdate = true;
 
     // put last instance in place of this one and decrement instance count
     this.locStringToInstance.remove(locString);
@@ -47,9 +49,9 @@ class DynamicInstancedMesh extends InstancedMesh {
     for (let i = 0; i < dynInstMesh.count; i++) {
       dynInstMesh.getMatrixAt(i, mat);
       this.setMatrixAt(i, mat);
+      this.instanceMatrix.needsUpdate = true;
       this.count++;
     }
-    // TODO: replace original reference somehow?:/
   }
 };
 

@@ -1,5 +1,8 @@
 <template>
   <div class="pos-abs">
+    <h2 class="hovered-block-text">
+      Last clicked block:
+    </h2>
     <h2 class="hovered-block-text" v-if="worldView.hoveredBlock">
       {{ worldView.hoveredBlock.name }}:{{ worldView.hoveredBlock.metadata }}
     </h2>

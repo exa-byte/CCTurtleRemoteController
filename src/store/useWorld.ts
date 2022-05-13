@@ -12,7 +12,7 @@ export const useWorldStore = defineStore('world', {
     URL: `${url}`,
     apiURL: `${url}api/`,
     textureURL: `${url}textures/`,
-    lastTransactionId: 0,
+    lastTransactionId: -1,
   }),
   getters: {
     getTurtleIds(): number[] {
@@ -38,9 +38,9 @@ export const useWorldStore = defineStore('world', {
       delete this.blocks[locString];
     },
     transactionAddBlock(locString: string, block: Block) {
-      this.blocks[locString] = block;
       const worldView = useWorldViewStore();
       worldView.removeBlock(locString);
+      this.blocks[locString] = block;
       worldView.addBlock(locString, block);
     },
     transactionSetTurtleState(turtleState: any) {
@@ -51,23 +51,20 @@ export const useWorldStore = defineStore('world', {
       }
     },
     applyTransactions(transactions: any) {
-      let currTransactionId = 0;
+      let currTransactionId = this.lastTransactionId;
       const len = Object.keys(transactions).length
       for (let i = 0; i < len; i++) {
-        currTransactionId = i + this.lastTransactionId + 1;
+        currTransactionId++;
         const t = transactions[currTransactionId];
         for (const [locString, block] of Object.entries(t.blocks)) {
           if (block) {
             this.transactionAddBlock(locString, block as Block);
-            console.log(locString);
           }
           else this.transactionRemoveBlock(locString);
         }
-        if (i == len - 1) {
-          this.transactionSetTurtleState(t.turtles);
-        }
+        this.transactionSetTurtleState(t.turtles);
+        this.lastTransactionId = currTransactionId;
       }
-      this.lastTransactionId = currTransactionId;
     },
     sendCommand(turtleId: number, cmd: string) {
       fetch(this.apiURL + "setCommand", {
