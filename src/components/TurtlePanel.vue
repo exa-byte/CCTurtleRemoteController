@@ -37,5 +37,8 @@ export default defineComponent({
       type: Number
     },
   },
+  mounted() {
+    this.worldView.followTurtle(this.turtleId);
+  },
 });
 </script>

@@ -23,7 +23,11 @@ export const useWorldStore = defineStore('world', {
     setTurtleStatus(remoteTurtleState: any) {
 
       for (let id in remoteTurtleState) {
-        let turtleState = remoteTurtleState[id]
+        let turtleState = remoteTurtleState[id];
+        if (!this.turtles[id]) {
+          const worldView = useWorldViewStore();
+          worldView.selectedTurtleId = parseInt(id);
+        }
         this.turtles[id] = turtleState;
         this.turtles[id].modified = Date.now();
 
