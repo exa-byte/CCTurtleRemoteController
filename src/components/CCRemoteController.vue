@@ -1,8 +1,12 @@
 <template>
   <div class="hud">
+    <h1 v-if="world.isLoading" class="centered">
+      LOADING ... (depending on the number of blocks this might take some
+      seconds)
+    </h1>
     <div>
-      <select v-model="worldView.selectedTurtleId">
-        <option v-for="key in world.getTurtleIds" :key="key">{{ key }}</option>
+      <select v-model="worldView.selectedTurtleId" @change="worldView.followTurtle(worldView.selectedTurtleId)">
+        <option v-for="id in world.getTurtleIds" :key="id" :value="id">Turtle {{ id }} : {{ world.turtles[id].label }}</option>
       </select>
       <TurtlePanel
         v-if="Number(worldView.selectedTurtleId) != -1"
@@ -25,6 +29,20 @@
 .hud {
   position: absolute;
   display: grid;
+}
+.centered {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+select {
+  padding: 4px;
+  border-radius: 4px;
+  background-color: rgb(52, 52, 52);
+  color: darkgray;
+  font-weight: bold;
 }
 </style>
 
@@ -78,6 +96,7 @@ export default defineComponent({
             world.blocks = data.state.world.blocks;
             worldView.regenerateSceneFromBlocks();
             world.lastTransactionId = data.state.lastTransactionId;
+            world.isLoading = false;
           } else {
             world.applyTransactions(data.transactions);
           }

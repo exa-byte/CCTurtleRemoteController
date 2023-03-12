@@ -1,7 +1,7 @@
 {
   "name": "ccturtleremotecontroller",
   "private": true,
-  "version": "0.7.0",
+  "version": "1.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
@@ -17,6 +17,7 @@
     "http-terminator": "^3.2.0",
     "math3d": "^0.2.2",
     "pinia": "^2.0.12",
+    "simple-node-logger": "^21.8.12",
     "three": "^0.138.3",
     "vue": "^3.2.25"
   },

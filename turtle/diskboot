@@ -1,0 +1,3 @@
+shell.run("cp disk/_startup startup")
+shell.run("cp disk/loc.sav loc.sav")
+shell.run("startup")

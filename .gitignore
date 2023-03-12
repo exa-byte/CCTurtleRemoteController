@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 grab
+logs
 *.local
 
 # Editor directories and files
@@ -27,7 +28,8 @@ grab
 # textures
 textures/blocks/*/*
 textures/items/*/*
-!/**/.gitkeep
 
 # saved state
-src/server/saved_state*.json
+src/server/saved/*
+
+!/**/.gitkeep

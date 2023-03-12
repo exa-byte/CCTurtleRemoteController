@@ -20,16 +20,13 @@ export default defineComponent({
     handleKeyDown(keyEvent: KeyboardEvent) {
       console.log(keyEvent.key);
       switch(keyEvent.key) {
-        case 'w':   this.sendTurtleCmd('tapi.forward()'); break;
-        case 's':   this.sendTurtleCmd('tapi.back()');    break;
-        case 'a':   this.sendTurtleCmd('tapi.left()');    break;
-        case 'd':   this.sendTurtleCmd('tapi.right()');   break;
-        case 'q':   this.sendTurtleCmd('tapi.down()');    break;
-        case 'e':   this.sendTurtleCmd('tapi.up()');      break;
+        case 'w':   this.sendTurtleCmd('return tapi.forward()'); break;
+        case 's':   this.sendTurtleCmd('return tapi.back()');    break;
+        case 'a':   this.sendTurtleCmd('return tapi.left()');    break;
+        case 'd':   this.sendTurtleCmd('return tapi.right()');   break;
+        case 'q':   this.sendTurtleCmd('return tapi.down()');    break;
+        case 'e':   this.sendTurtleCmd('return tapi.up()');      break;
         case 'Delete': this.clearCmdQueue();              break;
-        // case 's':   this.sendTurtleCmd('tapi.forward()'); break;
-        // case 's':   this.sendTurtleCmd('tapi.forward()'); break;
-        // case 's':   this.sendTurtleCmd('tapi.forward()'); break;
       }
     },
     sendTurtleCmd(cmd: string) {

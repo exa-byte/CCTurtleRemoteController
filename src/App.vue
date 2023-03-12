@@ -2,12 +2,13 @@
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 // import HelloWorld from './components/HelloWorld.vue'
-import CCRemoteController from './components/CCRemoteController.vue'
-
+import CCRemoteController from "./components/CCRemoteController.vue";
+import DiscordWidget from "./components/DiscordWidget.vue";
 </script>
 
 <template>
   <CCRemoteController />
+  <DiscordWidget />
 </template>
 
 <style>
@@ -21,5 +22,15 @@ import CCRemoteController from './components/CCRemoteController.vue'
 
 body {
   margin: 0;
+}
+
+button {
+  cursor: pointer;
+}
+button:hover {
+  filter: brightness(150%);
+}
+button:active {
+  filter: brightness(75%);
 }
 </style>

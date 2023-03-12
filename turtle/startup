@@ -11,20 +11,26 @@ function Split(s, delimiter)
 end
 
 function get_files_from_server()
-  print("GET " .. base_url .. "api/turtleFileNames")
   repeat res = http.get( base_url .. "api/turtleFileNames", {["Content-Type"] = "application/json"} )
   until res
   dl_files = res.readAll()
   dl_files = dl_files:sub(2, #dl_files-1):gsub("\"", "")
 
+  term.write("autoupdate...")
   for _, name in pairs(Split(dl_files, ",")) do
-    print("GET " .. base_url .. "turtle/" .. name)
+    -- print("GET " .. base_url .. "turtle/" .. name)
     local res = http.get( base_url .. "turtle/" .. name )
     if not res then print("Error on GET " .. base_url .. "turtle/" .. name) end
-    local f = fs.open(name, "w");
+    local f = fs.open(name, "w")
     f.write(res.readAll())
     f.close()
+    if name == "startup" then
+      fs.makeDir("backup")
+      fs.delete("backup/startup")
+      fs.copy("startup", "backup/startup")
+    end
   end
+  term.write("complete\n")
 end
 
 -- autoupdate

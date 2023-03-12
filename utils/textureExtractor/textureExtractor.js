@@ -74,6 +74,10 @@ function pickMultiFaceBlockDisplaySide() {
       const filePath = modDir + '/' + fileName;
       if (fileName.endsWith('_front.png') && !fs.existsSync(modDir + '/' + fileName.replace('_front', '')))
         fs.copyFileSync(filePath, modDir + '/' + fileName.replace('_front', ''));
+      else if (fileName.endsWith('_top.png') && !fs.existsSync(modDir + '/' + fileName.replace('_top', '')))
+        fs.copyFileSync(filePath, modDir + '/' + fileName.replace('_top', ''));
+      else if (fileName.endsWith('_still.png') && !fs.existsSync(modDir + '/' + fileName.replace('_still', '')))
+        fs.copyFileSync(filePath, modDir + '/' + fileName.replace('_still', ''));
     });
   });
 }

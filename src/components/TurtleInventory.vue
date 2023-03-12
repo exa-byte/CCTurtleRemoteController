@@ -3,12 +3,17 @@
     <div class="inventory-container">
       <InventorySlot
         v-for="[index, slot] in world.turtles[turtleId].inv.entries()"
-        :key="index+1"
+        :key="index + 1"
         :turtleId="turtleId"
         :invSlot="slot"
-        :slotNum="index+1"
+        :slotNum="index + 1"
         :isSelected="index === world.turtles[turtleId].selectedSlot - 1"
-        @click="world.sendCommand(turtleId, 'tapi.select(' + (index + 1).toString() + ')')"
+        @click="
+          world.sendCommand(
+            turtleId,
+            'tapi.select(' + (index + 1).toString() + ')'
+          )
+        "
       />
     </div>
   </div>
@@ -21,11 +26,13 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-gap: 3%;
-  background-color: lightgray;
+  background-color: #383e42;
+  color: darkgray;
 }
 
 .panel {
-  background-color: lightgray;
+  background-color: #383e42;
+  color: darkgray;
 }
 </style>
 
@@ -43,7 +50,7 @@ export default defineComponent({
   props: {
     turtleId: {
       required: true,
-      type: Number
+      type: Number,
     },
   },
 });

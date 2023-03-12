@@ -3,18 +3,25 @@
     @keydown.stop
     class="lua-code"
     v-model="cmd"
-    placeholder="write lua code here"
+    placeholder="write lua code here, e.g. return 42"
   ></textarea>
-  <button @click="world.sendCommand(turtleId, cmd)">Execute</button>
+  <button id="execute" @click="world.sendCommand(turtleId, cmd)">Execute</button>
   <div class="command-result">{{ world.commandResult[worldView.selectedTurtleId] }}</div>
 </template>
 
 <style scoped>
 .lua-code {
   height: 24px;
+  background-color: #383e42;
+  color: darkgray;
+}
+#execute {
+  background-color: #383e42;
+  color: darkgray;
 }
 .command-result {
-  background-color: lightgray;
+  background-color: #383e42;
+  color: darkgray;
   word-wrap: break-word;
   width: 300px;
 }

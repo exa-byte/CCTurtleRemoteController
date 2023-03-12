@@ -25,7 +25,46 @@ var scene: Scene,
   clock: THREE.Clock,
   mouse = { x: 0, y: 0 },
   turtleModel: THREE.Object3D,
-  blockMeshes: BlockRenderStructure;
+  blockMeshes: BlockRenderStructure,
+  animatedTextures = [] as TextureAnimator[];
+
+class TextureAnimator {
+  texture: THREE.Texture;
+  tileDurationMillis: number;
+  tilesHorizontal: number;
+  tilesVertical: number;
+  numberOfTiles: number;
+  currentDisplayMillis: number;
+  currentTile: number;
+  forward: boolean;
+
+  constructor(texture: THREE.Texture, tileDurationMillis: number) {
+    this.texture = texture;
+    this.tileDurationMillis = tileDurationMillis;
+    this.tilesHorizontal = 1;
+    this.tilesVertical = texture.image.height / texture.image.width;
+    this.numberOfTiles = this.tilesHorizontal * this.tilesVertical;
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(1 / this.tilesHorizontal, 1 / this.tilesVertical);
+    this.currentDisplayMillis = 0;
+    this.currentTile = 0;
+    this.forward = true;
+  }
+
+  update(milliSec: number) {
+    this.currentDisplayMillis += milliSec;
+    while (this.currentDisplayMillis > this.tileDurationMillis) {
+      this.currentDisplayMillis -= this.tileDurationMillis;
+      this.currentTile += this.forward ? 1 : -1;
+      if (this.currentTile == this.numberOfTiles - 1 || this.currentTile == 0)
+        this.forward = !this.forward;
+      const currentColumn = this.currentTile % this.tilesHorizontal;
+      const currentRow = Math.floor(this.currentTile / this.tilesHorizontal);
+      this.texture.offset.x = currentColumn / this.tilesHorizontal;
+      this.texture.offset.y = currentRow / this.tilesVertical;
+    }
+  }
+}
 
 export default defineComponent({
   setup() {
@@ -47,7 +86,7 @@ export default defineComponent({
       const loader = new GLTFLoader();
 
       loader.load(
-        "textures/turtle/CCTurtle.glb",
+        "textures/turtle/CCTurtle_happy.glb",
         (gltf) => (turtleModel = gltf.scene),
         undefined,
         (error) => console.error(error)
@@ -160,6 +199,9 @@ export default defineComponent({
       }
 
       const hasControlsUpdated = cameraControls.update(delta);
+      for (const el of animatedTextures) {
+        el.update(delta * 1000);
+      }
       requestAnimationFrame(this.animate);
       this.render();
     },
@@ -245,13 +287,7 @@ export default defineComponent({
       }
     },
     addTurtle(turtleId: string) {
-      // const geometry = new THREE.ConeGeometry(0.5, 1, 8);
-      // const material = new THREE.MeshPhongMaterial({
-      //   color: 0xffff00,
-      //   flatShading: true,
-      // });
-      // const turtle = new THREE.Mesh(geometry, material);
-      const turtle = turtleModel.clone()
+      const turtle = turtleModel.clone();
       scene.add(turtle);
       this.worldView.turtles[turtleId] = turtle;
       const turtleData = this.world.turtles[turtleId];
@@ -281,19 +317,11 @@ export default defineComponent({
         new THREE.Vector3(turtle.loc.x, turtle.loc.y, turtle.loc.z)
       );
     },
+    addAnimatedTexture(texture: THREE.Texture) {
+      animatedTextures.push(new TextureAnimator(texture, 1000 / 8));
+    },
     render() {
       renderer.render(scene, camera);
-      // console.log(blocks.children.length);
-      // for (let i = 0; i < blocks.children.length; i++) {
-      //   let pos1 = blocks.children[i].position;
-      //   for(let j = i + 1; j < blocks.children.length; j++) {
-      //     if (pos1.equals(blocks.children[j].position)) {
-      //       console.log(`Detected two blocks on ${pos1}`);
-      //     }
-      //   }
-      // }
-      // TODO: fix that e.g. grass doesnt disappear when going through
-      // seeeeems to be only blocks that automatically get destroyed when moving through
     },
   },
   mounted() {
@@ -307,6 +335,7 @@ export default defineComponent({
     worldView.addBlock = this.addBlock;
     worldView.removeBlock = this.removeBlock;
     worldView.updateTurtle = this.updateTurtle;
+    worldView.addAnimatedTexture = this.addAnimatedTexture;
   },
 });
 </script>

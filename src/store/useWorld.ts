@@ -13,6 +13,7 @@ export const useWorldStore = defineStore('world', {
     apiURL: `${url}api/`,
     textureURL: `${url}textures/`,
     lastTransactionId: -1,
+    isLoading: true,
   }),
   getters: {
     getTurtleIds(): number[] {
@@ -79,6 +80,21 @@ export const useWorldStore = defineStore('world', {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ id: turtleId, cmd: cmd }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+        });
+    },
+    sendStopSignal(turtleId: number) {
+      fetch(this.apiURL + "setStopSignal", {
+        method: 'POST',
+        mode: "cors",
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: turtleId }),
       })
         .then((res) => res.json())
         .then((data) => {

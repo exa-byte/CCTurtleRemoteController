@@ -13,7 +13,7 @@
       :src="
         invSlot
           ? world.textureURL + 'items/' + invSlot.name.replace(':', '/') + '.png'
-          : 'https://dummyimage.com/64x64/aaa/aaa.jpg'
+          : 'https://dummyimage.com/64x64/383e42/383e42.jpg'
       "
       @error="getDefaultItemImage"
     />
@@ -24,15 +24,16 @@
 </template>
 
 <style scoped>
-.inventory-slot {
-  background-color: gray;
+.inventory-slot { 
+  background-color: #666666;
+  color: darkgray;
   min-width: 0;
   min-height: 0;
   padding: 10%;
 
   display: block;
   position: relative;
-  color: white;
+  cursor: pointer;
 
   /* border-style: solid;
   border-width: 10%;

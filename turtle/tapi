@@ -18,7 +18,7 @@ local state = {
   }, -- relative location to app origin
   rot = 0, -- look direction
   inv = { -- will include sensed items in turtle inventory with turtle.getItemDetail(slot)
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
   selectedSlot = -1,
   view = { -- will include sensed blocks with turtle.inspect[...]
     front = 0,
@@ -28,7 +28,58 @@ local state = {
   fuelLevel = -1,
   fuelLimit = -1
 }
+-- semaphore implementation
+local lmetatable = {
+  __index = {
+    incr = function(self)
+      if self.stopSignal then os.sleep(1) end
+      self.count = self.count + 1
+    end,
+    decr = function(self)
+      self.count = self.count - 1
+    end,
+    tostring = function(self)
+      return "currLocks:" .. tostring(self.count)
+    end,
+    value = function(self)
+      return self.count
+    end
+  },
+  __tostring = function(l) return l:tostring() end,
+}
+locSemaphore = { count = 0, stopSignal = false }
+setmetatable(locSemaphore, lmetatable)
+
+if os.getComputerLabel() == "" then
 os.setComputerLabel("kukumba" .. tostring(os.getComputerID()))
+end
+
+-- global api overwrites
+
+local native = {
+  turtle = {
+    up = turtle.up,
+    down = turtle.down,
+    forward = turtle.forward,
+    back = turtle.back,
+    turnLeft = turtle.turnLeft,
+    turnRight = turtle.turnRight,
+    dig = turtle.dig,
+    digUp = turtle.digUp,
+    digDown = turtle.digDown,
+  },
+  os = {
+    os.restart
+  }
+}
+os.restart = function()
+  fs.delete("startup")
+  fs.copy("backup/startup", "startup")
+  native.os.restart()
+end
+os.shutdown = os.restart
+
+-- send status to server
 
 function send_status_update()
   scan_surrounding_blocks()
@@ -116,16 +167,16 @@ function parse_user_location_input()
   for substring in input:gmatch("%S+") do
     table.insert(splitInput, substring)
   end
-  for i=1,3 do
+  for i = 1, 3 do
   	locAndHeading[i] = tonumber(splitInput[i])
 	if locAndHeading[i] == nil then
 	  error(tostring(splitInput[i]) .. " is not a valid coordinate")
 	end
   end
 	local h = string.lower(splitInput[4])
-	if     h == "west"  then locAndHeading[4] = 1
+  if h == "west" then locAndHeading[4] = 1
 	elseif h == "north" then locAndHeading[4] = 2
-	elseif h == "east"  then locAndHeading[4] = 3
+  elseif h == "east" then locAndHeading[4] = 3
 	elseif h == "south" then locAndHeading[4] = 4
 	else error(tostring(splitInput[4]) .. " is not a valid heading")
   end
@@ -154,15 +205,24 @@ function load_loc_from_file()
     end
   end
 end
+
 load_loc_from_file()
 
 -- movement
+
+function nativeUp()
+  locSemaphore:incr()
+  local succ = loc_internal:up(native.turtle)
+  save_loc_to_file()
+  locSemaphore:decr()
+  return succ
+end
 function up(count, reliable)
   reliable = reliable or false
   count = count or 1
   local msg_written = false
   for i = 1, count do
-    while not loc_internal:up() do
+    while not loc_internal:up(native.turtle) do
       if not reliable then
         return false, i - 1
       end
@@ -173,40 +233,58 @@ function up(count, reliable)
       end
       os.sleep(1);
     end
-    save_loc_to_file()
   end
   return true
 end
-u = up
 
+u = up
+turtle.up = nativeUp
+
+
+function nativeDown()
+  locSemaphore:incr()
+  local succ = loc_internal:down(native.turtle)
+  save_loc_to_file()
+  locSemaphore:decr()
+  return succ
+end
 function down(count, reliable)
   reliable = reliable or false
   count = count or 1
   local msg_written = false
   for i = 1, count do
-    while not loc_internal:down() do
+    while not nativeDown() do
       if not reliable then
         return false, i - 1
       end
 
       if not msg_written then
         print("cannot move down - pls remove block")
+        save_loc_to_file()
         msg_written = true
       end
       os.sleep(1);
     end
-    save_loc_to_file()
   end
   return true
 end
-d = down
 
+d = down
+turtle.down = nativeDown
+
+function nativeForward()
+  locSemaphore:incr()
+  local succ = loc_internal:forward(native.turtle)
+  save_loc_to_file()
+  locSemaphore:decr()
+  return succ
+end
 function forward(count, reliable)
   reliable = reliable or false
   count = count or 1
   local msg_written = false
   for i = 1, count do
-    while not loc_internal:forward() do
+    while not nativeForward() do
       if not reliable then
         return false, i - 1
       end
@@ -217,18 +295,26 @@ function forward(count, reliable)
       end
       os.sleep(1);
     end
-    save_loc_to_file()
   end
   return true
 end
-f = forward
 
+f = forward
+turtle.forward = nativeForward
+
+function nativeBack()
+  locSemaphore:incr()
+  local succ = loc_internal:back(native.turtle)
+  save_loc_to_file()
+  locSemaphore:decr()
+  return succ
+end
 function back(count, reliable)
   reliable = reliable or false
   count = count or 1
   local msg_written = false
   for i = 1, count do
-    while not loc_internal:back() do
+    while not nativeBack() do
       if not reliable then
         return false, i - 1
       end
@@ -239,14 +325,15 @@ function back(count, reliable)
       end
       os.sleep(1);
     end
-    save_loc_to_file()
   end
   return true
 end
+
 b = back
+turtle.back = nativeBack
 
 function move(dx, dy, dz, reliable) -- move the turtle by a given vector (moves x first z last), unreliable
-  print("move"..tostring(dx).." "..tostring(dx).." "..tostring(dx))
+  print("move" .. tostring(dx) .. " " .. tostring(dy) .. " " .. tostring(dz))
   if dx ~= 0 then
     turnTo((dx > 0) and 3 or 1)
   end -- west => neg x
@@ -280,29 +367,49 @@ function goTo(x, y, z)
 end
 
 -- rotation
+function nativeLeft()
+  locSemaphore:incr()
+  local succ = loc_internal:left(native.turtle)
+  save_loc_to_file()
+  locSemaphore:decr()
+  return succ
+end
 function left(num_turns)
   num_turns = num_turns or 1
   for i = 1, num_turns do
-    loc_internal:left()
-    save_loc_to_file()
+    nativeLeft()
   end
   return true
 end
-l = left
 
+l = left
+turtle.turnLeft = nativeLeft
+
+function nativeRight()
+  locSemaphore:incr()
+  local succ = loc_internal:right(native.turtle)
+  save_loc_to_file()
+  locSemaphore:decr()
+  return succ
+end
 function right(num_turns)
   num_turns = num_turns or 1
   for i = 1, num_turns do
-    loc_internal:right()
-    save_loc_to_file()
+    nativeRight()
   end
   return true
 end
+
 r = right
+turtle.turnRight = nativeRight
 
 function turnTo(heading)
-  return loc_internal:setHeading(heading)
+  locSemaphore:incr()
+  local res = loc_internal:setHeading(native.turtle, heading)
+  locSemaphore:decr()
+  return res
 end
+
 face = turnTo
 
 -- placement
@@ -310,48 +417,63 @@ function place(slot)
   if slot then
     select(slot)
   end
-  return turtle.place()
+  local succ = turtle.place()
+  send_status_update()
+  return succ
 end
+
 p = place
 
 function placeDown(slot)
   if slot then
     select(slot)
   end
-  return turtle.placeDown()
+  local succ = turtle.placeDown()
+  send_status_update()
+  return succ
 end
+
 pd = placeDown
 
 function placeUp(slot)
   if slot then
     select(slot)
   end
-  return turtle.placeUp()
+  local succ = turtle.placeUp()
+  send_status_update()
+  return succ
 end
+
 pu = placeUp
 
 -- dig
 
 function dig()
-  local succ = turtle.dig()
+  local succ = native.turtle.dig()
   send_status_update()
   return succ
 end
+
 e = dig
+turtle.dig = dig
 
 function digUp()
-  local succ = turtle.digUp()
+  local succ = native.turtle.digUp()
   send_status_update()
   return succ
 end
+
 eu = digUp
+turtle.digUp = digUp
 
 function digDown()
-  local succ = turtle.digDown()
+  local succ = native.turtle.digDown()
   send_status_update()
   return succ
 end
+
 ed = digDown
+turtle.digDown = digDown
 
 function digRepeat()
   local succ
@@ -361,6 +483,7 @@ function digRepeat()
   send_status_update()
   return succ
 end
+
 e = dig
 
 function digUpRepeat()
@@ -371,6 +494,7 @@ function digUpRepeat()
   send_status_update()
   return succ
 end
+
 eu = digUp
 
 function digDownRepeat()
@@ -381,36 +505,38 @@ function digDownRepeat()
   send_status_update()
   return succ
 end
+
 ed = digDown
 
 function digSide(side)
   if not side then return false, "side must not be nil" end
-  if side == "front"  then return dig() end
-  if side == "top"    then return digUp() end
+  if side == "front" then return dig() end
+  if side == "top" then return digUp() end
   if side == "bottom" then return digDown() end
 end
 
 -- sucking
 
 function suck()
-  turtle.suck()
+  local succ = turtle.suck()
   send_status_update()
+  return succ
 end
 
 function suckUp()
-  turtle.suckUp()
+  local succ = turtle.suckUp()
   send_status_update()
+  return succ
 end
 
 function suckDown()
-  turtle.suckDown()
+  local succ = turtle.suckDown()
   send_status_update()
+  return succ
 end
 
 function suckAll()
-  suck()
-  suckUp()
-  suckDown()
+  return suck() or suckUp() or suckDown()
 end
 
 -- drop
@@ -419,24 +545,27 @@ function drop(slot)
   if slot then
     select(slot)
   end
-  turtle.drop()
+  local succ = turtle.drop()
   send_status_update()
+  return succ
 end
 
 function dropUp(slot)
   if slot then
     select(slot)
   end
-  turtle.dropUp()
+  local succ = turtle.dropUp()
   send_status_update()
+  return succ
 end
 
 function dropDown(slot)
   if slot then
     select(slot)
   end
-  turtle.dropDown()
+  local succ = turtle.dropDown()
   send_status_update()
+  return succ
 end
 
 -- fuel
@@ -495,6 +624,7 @@ end
 
 function contains_items(name, req_count, meta)
   local count = 0
+  req_count = req_count or 1
   for i = 1, 16 do
     local stack = turtle.getItemDetail(i)
     if stack and stack.name == name and (not meta or stack.damage == meta) then
@@ -540,7 +670,7 @@ function doesChestContainItemList(itemList, inventorySide)
   -- make a copy of itemList
   local _itemList = {}
   for pos, wantStack in pairs(itemList) do
-    table.insert(_itemList, pos, { name=wantStack.name, count=wantStack.count })
+    table.insert(_itemList, pos, { name = wantStack.name, count = wantStack.count })
   end
 
   -- iterate chestItems and subtract from _wantList
@@ -574,7 +704,7 @@ function pullItemsFromChest(itemList, inventorySide, allowPartial)
 
   local _itemList = {}
   for pos, wantStack in pairs(itemList) do
-    table.insert(_itemList, pos, { name=wantStack.name, count=wantStack.count })
+    table.insert(_itemList, pos, { name = wantStack.name, count = wantStack.count })
   end
 
   -- iterate chestItems and subtract from _wantList
@@ -610,9 +740,9 @@ function placeIntermediateChest(chestId)
   chestId = chestId or "chest"
   if not select(findItemFuzzy(chestId)) then return false, "could not find intermediate chest in inventory" end
   local side
-  if     placeUp()   then side = "top"
+  if placeUp() then side = "top"
   elseif placeDown() then side = "bottom"
-  elseif place()     then side = "front"
+  elseif place() then side = "front"
   end
   if not side then return false, "can not place intermediate chest anywhere" end
   return side
