@@ -48,8 +48,3 @@ If you have other mods installed you can also extract the textures in the same w
 | a   | turn left                  |
 | d   | turn right                 |
 | del | stop (clear command queue) |
-  
-**Known bugs**
-  
-* when using the transaction-only state update method, there is a bug in the transaction code which desyncs the ui block world state from the servers' - a page reload fixes this temporarily; for now the default is fetching the complete state every second, but this is not very performant for larger states
-  
