@@ -1,7 +1,7 @@
 {
   "name": "ccturtleremotecontroller",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
@@ -24,7 +24,6 @@
   "devDependencies": {
     "@types/three": "^0.138.0",
     "@vitejs/plugin-vue": "^2.2.0",
-    "minecraft-blocks-render": "^1.1.1",
     "typescript": "^4.5.4",
     "unzipper": "^0.10.11",
     "vite": "^2.8.0",
