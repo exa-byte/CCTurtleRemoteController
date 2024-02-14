@@ -1,6 +1,13 @@
 
 # Change Log
 
+## [1.0.1]
+
+### Changed
+
+- Easier config for hosting on localhost & public ip
+- Updated readme accordingly
+
 ## [1.0.0]
 
 ### Changed
