@@ -51,3 +51,9 @@ If you have other mods installed you can also extract the textures in the same w
 | a   | turn left                  |
 | d   | turn right                 |
 | del | stop (clear command queue) |
+
+**Modifying the user interface**
+
+- for development go to src/store/useWorld.ts line 5 and follow the instructions of the comment.
+- run ```npm run dev```
+- the dev frontend is now available at http://localhost:3000/ and you get to tinker on the frontend with hot reloading. 

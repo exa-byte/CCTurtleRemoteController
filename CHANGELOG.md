@@ -1,6 +1,13 @@
 
 # Change Log
 
+## [1.0.2]
+
+### Added
+
+- Included instructions how to use the vite dev server
+- Updated readme accordingly
+
 ## [1.0.1]
 
 ### Changed

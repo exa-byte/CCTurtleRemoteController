@@ -2,6 +2,9 @@ import { defineStore } from 'pinia'
 import { TurtleState, Block } from '../types/types';
 import { useWorldViewStore } from './useWorldView';
 
+// you have to set this to "http://localhost/" or "http://<your public ip>/" 
+// (if you use public ip you also have to forward port 3000) if you want to develop using rpm run dev
+// after developing you can reset it to an empty string or this might cause you a headache if you switch from localhost to public ip hosting
 const url = ""
 
 export const useWorldStore = defineStore('world', {
