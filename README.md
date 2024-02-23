@@ -13,7 +13,7 @@ A node server with user interface for remote controlling your computercraft turt
        * "turtle/tapi" Line 6 
     * allow http calls to localhost in your <mcsavegame>/serverconfig/computercraft-server.toml
 6. Build the frontend using `npm run build`
-7. If you don't want to see textured blocks and items in the ui you can skip this point, ~~else run the command `npm run build-textures "<pathToYourMinecraftJar>" "<optional: directoryContainingYourModJars>"`; in case any errors pop up, just restart the command until no errors pop up. The command will need to be executed 2 times without errors due to some bug. After completion, the ui will be able to display most blocks and items with default mc textures applied~~ (currently doesn't work, you can still add your own icon renders though)
+7. If you don't want to see textured blocks and items in the ui you can skip this point, else run the command `npm run build-textures "<pathToYourMinecraftJar>" "<optional: directoryContainingYourModJars>"`; in case any errors pop up, just restart the command until no errors pop up. The command will need to be executed 2 times without errors due to some bug. After completion, the ui will be able to display most blocks and items with default mc textures applied
 8. Run the server: `npm run server`
 9. You can now reach the ui from http://localhost/ or your public ip address if you chose the second option in step 4
 10. Add any amount of turtles by running `wget run http://localhost/turtle/startup` or `wget run http://<yourip>/turtle/startup` in the turtles command line and following the displayed instructions
@@ -23,11 +23,11 @@ A node server with user interface for remote controlling your computercraft turt
   
 **Block and item textures**
 
-❗ Due some changes in a dependency, this currently doesn't work anymore.
-🔥new: Extracting textures is now easier than ever: just go with step 7 in setup.
-The ui supports textured blocks and items. They are just not included here for license reasons. If you want to, you can extract the block textures from your `/minecraft/versions/YOUR_VERSION/x.xx.x.jar` and paste them into `textures/blocks/minecraft/`.
-Same goes for items which go into `textures/items/minecraft/`. However normal block icons are not included, you will have to render them yourself from the blocktextures or get them from somewhere else (I used https://www.npmjs.com/package/minecraft-blocks-render).
-If you have other mods installed you can also extract the textures in the same way, except that the textures then go into `textures/blocks/yourmodname/` and `textures/items/yourmodname/` respectively.
+Extracting textures is now easier than ever: just go with step 7 in setup.
+The ui supports textured blocks and items. They are just not included here for license reasons. 
+If you have additional textures that don't get extracted properly, you can manually add them into `textures/blocks/minecraft/`.
+Same goes for items which go into `textures/items/minecraft/`.
+If you add textures from mods, the textures must go into `textures/blocks/yourmodname/` and `textures/items/yourmodname/` respectively (yourmodname is the ingame block id prefix).
 
 **Random info**
 
