@@ -32,7 +32,7 @@ If you add textures from mods, the textures must go into `textures/blocks/yourmo
 **Random info**
 
 - you can double click a block and the selected turtle will try to move there with a very simple algorithm
-- hovering over a block will show its id in the top right corner along with its coordinates
+- hovering over a block will show its id in the top right corner along with its coordinates (i think i changed it to clicking for performance reasons)
 - you can click a chest to open a window displaying its contents, however interaction is not implemented yet
 - you can drag and drop between turtle inventory slots hold `ctrl` for moving a whole stack
 - the bar below the turtle inventory is the turtles fuel gauge and shows the number of blocks you can move with the current fuel level
