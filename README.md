@@ -1,6 +1,7 @@
 # CCTurtleRemoteController
 A node server with user interface for remote controlling your computercraft turtles in your browser via the http api.
-<img width="960" alt="image" src="https://user-images.githubusercontent.com/14824895/166954166-ecf32647-2f5f-4cff-bf16-a79f6dba9573.png">
+
+<img width="993" alt="TurtleController_2" src="https://github.com/exa-byte/CCTurtleRemoteController/assets/14824895/a61f863b-b3dd-495c-bea2-09d802ff2692">
 
 **Setup**
 
