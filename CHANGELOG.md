@@ -1,6 +1,12 @@
 
 # Change Log
 
+## [1.1.0]
+
+### Fixed
+
+- Texture generation script now works again
+
 ## [1.0.2]
 
 ### Added
