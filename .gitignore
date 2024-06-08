@@ -33,3 +33,7 @@ textures/items/*/*
 src/server/saved/*
 
 !/**/.gitkeep
+
+# packaged binary
+packaged
+packagedZip
