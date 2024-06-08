@@ -1,13 +1,15 @@
 {
   "name": "ccturtleremotecontroller",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
+  "bin": "src/server/server.js",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "server": "node src/server/server.js",
-    "build-textures": "node utils/textureExtractor/textureExtractor.js"
+    "build-textures": "node utils/textureExtractor/textureExtractor.js",
+    "pkg": "npm run build && pkg package.json && node utils/zipPackaged.js"
   },
   "dependencies": {
     "camera-controls": "1.34.2",
@@ -24,10 +26,15 @@
   "devDependencies": {
     "@types/three": "0.138.0",
     "@vitejs/plugin-vue": "2.2.0",
+    "archiver": "^7.0.1",
     "minecraft-blocks-render": "1.1.1",
+    "pkg": "^5.8.1",
     "typescript": "4.5.4",
     "unzipper": "0.10.11",
     "vite": "2.9.17",
     "vue-tsc": "0.29.8"
+  },
+  "pkg": {
+    "outputPath": "packaged"
   }
 }
