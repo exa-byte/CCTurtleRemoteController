@@ -3,6 +3,7 @@
 
 os.loadAPI("location")
 
+-- !MUST END WITH '/api/' 
 url = "http://localhost/api/"
 state_url = url .. "state/"
 local headers = {

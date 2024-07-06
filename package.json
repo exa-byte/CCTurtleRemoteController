@@ -1,7 +1,7 @@
 {
   "name": "ccturtleremotecontroller",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.2.1",
   "bin": "src/server/server.js",
   "scripts": {
     "dev": "vite",

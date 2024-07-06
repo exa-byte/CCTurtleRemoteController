@@ -1,4 +1,5 @@
 -- github: https://github.com/exa-byte/CCTurtleRemoteController
+-- !MUST END WITH A '/' 
 base_url = "http://localhost/"
 
 -- lib

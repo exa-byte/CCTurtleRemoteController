@@ -1,6 +1,12 @@
 
 # Change Log
 
+## [1.2.1]
+
+### Fixed
+
+- Added important comment to locations where you would put your ip/url/localhost
+
 ## [1.1.0]
 
 ### Fixed
