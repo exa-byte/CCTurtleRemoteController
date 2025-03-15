@@ -8,7 +8,8 @@ A node server with user interface for remote controlling your computercraft turt
 1. Clone this repo or download it as zip and extract it
 2. Install Node.js including npm (https://nodejs.org/en/) or make sure you update the version you are using else it will likely cause some errors.
 3. Run `npm install` in the root directory of the repo
-4. Now you have 2 options, pick one of them:
+    * if you are on linux and get this [error](https://github.com/exa-byte/CCTurtleRemoteController/issues/19): run `apt update && apt install -y build-essential libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev pkg-config` and retry `npm install` afterwards
+5. Now you have 2 options, pick one of them:
     * setup port forwarding and replace every localhost in the code (in the server files, not the turtle!) with your public ip address
        * "turtle/startup" Line 2
        * "turtle/tapi" Line 6 
