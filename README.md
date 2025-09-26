@@ -12,7 +12,8 @@ A node server with user interface for remote controlling your computercraft turt
 5. Now you have 2 options, pick one of them:
     * setup port forwarding and replace every localhost in the code (in the server files, not the turtle!) with your public ip address
        * "turtle/startup" Line 2
-       * "turtle/tapi" Line 6 
+       * "turtle/tapi" Line 6
+       * if using non-default port change it in "src/server/server.js" Line 253
     * allow http calls to localhost in your <mcsavegame>/serverconfig/computercraft-server.toml
 6. Build the frontend using `npm run build`
 7. If you don't want to see textured blocks and items in the ui you can skip this point, else run the command `npm run build-textures "<pathToYourMinecraftJar>" "<optional: directoryContainingYourModJars>"` (note: \<pathToYourMinecraftJar\> points to a minecraft jar **file** which is usually located under %appdata%\\.minecraft\versions\yourversion\yourversion.jar when using the default minecraft launcher, while \<optional: directoryContainingYourModJars\> points to a **directory**); in case any errors pop up, just restart the command until no errors pop up. The command will need to be executed 2 times without errors due to some bug. After completion, the ui will be able to display most blocks and items with default mc textures applied
